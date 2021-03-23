@@ -1,0 +1,162 @@
+
+Name:Kavya Sri Gudivada
+Last 4 digits ID:6005
+
+CSE 6331, Cloud Computing					
+
+Quiz Q4, 3.30, Summer 2020   (c) DL, UTA, 2020
+
+
+  C&P means cut and paste only those relevant lines from your program(s) into this quiz.
+
+ 1.  I understand that I am on my honor during this quiz, I will not collaborate, use 
+     non-allowed sources, and I will not discuss or share this quiz with anyone for the next 
+     12 hours.
+     You MAY: use Google to search, use previous source code, 
+     YOU MAY NOT use:
+     Email, Facebook, Hangouts, IM, chats, Skype or ANY other human connection.
+
+     ANY VIOLATIONS to scholastic honesty, which include working with others during this quiz, communicating with others during
+     this quiz, giving anyone or recieving from anyone any information during this quiz or for the next 6 hours after completion
+     of this quiz is a honors violation and will result in a -100 points being assessed for this quiz and being reported. 
+
+     This is a timed test. Late tests will have points deducted for being late.
+     Very late tests will not be graded.
+
+     When you are complete, with any part, please send the link, raise your hand, so we may visually inspect that part.
+
+     The second part of the test, you should electronically submit, you will need to copy and paste 
+     only those lines of code to implement that part of the test, usually a few (two to eight) lines of code. 
+     Place it immediately after the question.
+
+     Submit this Quiz (renamed) with code cut and pasted, ONLY text. DO NOT submit zips, binaries, libraries,
+     or anything other than text.
+
+     When any parts(questions) are complete complete, submit this test, you may make multiple submissions.
+
+     If you have computer, or other, problems, please raise your hand immediately.
+
+     If you understand and agree, please initial here:
+     _________KSG________
+
+ 2. Get files from this same folder.
+   
+ 3. Name your program/submission with your name and last digits of your ID.
+
+ 4a. Using the cloud services provider, all functionality possible should be implemented on that provider.
+     (Of course, displaying web pages through a browser and the user interface is "local")
+
+ 4b. Upload all data files (*csv, not this quiz) to cloud service. 
+  
+Show and submit code, when each part is complete, raise your hand and then show us:
+
+ To recieve credit you MUST show (demo) AND submit the code (text only) on Canvas.
+
+  5. Show a web page and interface (which resides on the cloud provider) with your name,
+     and below that, Student ID at the top of every web page dispayed 
+     (for this quiz). 
+     Please use a large font.
+    
+     The cloud service providers are IBM Cloud (BlueMix), Microsoft Azure, Amazon AWS. You may use any you wish.
+
+    Import the datasets into a Relational Data Base (SQL), if you have already done this, (briefly) explain/describe
+    how you did this. Please note that for some parts of the following you will need to create indexes (keys)
+    appropriately.
+
+<div class="jumbotron">
+        <h1>Kavya Sri Gudivada</h1>
+        <H1>1001766005</H1>
+    </div>
+
+  6. Please show a page, followed by a vertical bar chart on that page, where the user, through a web form, 
+     will give a country name (column C), then you will display a bar chart with labels (volcano name) 
+     on the top of each bar for each volcano in that country.
+
+ QUESTION 6
+<p>
+	<form action="/barchart" method="get">
+	Enter the Country Name<input type="text" name="con1" maxlength="200" width="60"> <br/>
+	 <input type="submit" value="Submit"><br/><br/>
+   </form>
+   </p>
+@app.route('/barchart', methods=['GET'])
+def barchart():
+    con1 = (request.args.get('con1'))
+    return chart(con1)
+
+
+def chart(con1=None):
+    dbconn = pypyodbc.connect(
+        'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+    cursor = dbconn.cursor()
+    start = time.time()
+    success = "select Country, Volcano_Name from volcano where Country  = '" + str(con1) + "';"
+    print("Execution failed")
+    cursor.execute(success)
+    data = list(cursor.fetchall())
+    rows = list([['country', 'volcano_name', ]])
+    for j in data:
+        rows.append(list(j))
+    print("Step4")
+    arr = []
+    arr.append(rows)
+    print(arr)
+    end = time.time()
+    total = end - start
+    return render_template('bar.html', ci=arr, rr=rows)
+
+  7. Allow a user, through a web form, to give an elevation range and a number of slices N,
+     and in a pie chart show the total number of volcanos for each of N pie slices (there should be N pie slices)
+     evenly divided into groups of elevations. (For example from 1000 to 5000, and a number of slices N = 4
+     show 4 slices, the first for elevation 1000 to 2000 has 99 volcanos out of the 191 total in that range, 
+     more than half.)
+     The pie chart should occupy 70 to 85% of the screen, each slice with labels inside the slice, 
+     each in a different color.
+     
+
+  8. Allow a user, through a web form, to give a volcano number range (for example 40000 to 41000),
+     and show a point chart (scatter diagram) where the X axis is the volcano number and the Y axis 
+     is the elevation.
+     (Please note that a few of the volcanos are under water or ground, so the elevation may be negative.) 
+     Please scale so that it fits on the screen, occupying between 70 to 80% of the screen width.
+     Please label both axis.
+QUESTION 8
+   <p>
+	<form action="/scatter" method="get">
+	Enter volcano number range from<input type="number" name="latitude1" maxlength="200" width="60"> <br/>
+	Enter volcano number range to <input type="number" name="latitude2" maxlength="200" width="60"> <br/>
+	 <input type="submit" value="Submit"><br/><br/>
+   </form>
+   </p>
+
+@app.route('/scatter', methods=['GET'])
+def scatter():
+    lat1 = int(request.args.get('lat1'))
+    lat2 = int(request.args.get('lat2'))
+    return scatterplot(lat1,lat2)
+
+
+def scatterplot(lat1=None, lat2=None):
+    dbconn = pypyodbc.connect(
+        'DRIVER=' + driver + ';SERVER=' + server + ';PORT=1433;DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+    cursor = dbconn.cursor()
+    success = "select \"Number\", \"elev\" from volcano where \"Number\" > '" + str(lat1) + "' and \"Number\" <'" + str(lat2) + "'"
+    print("Execution failed")
+    cursor.execute(success)
+    data = list(cursor.fetchall())
+    rows = list([['Number', 'elevation', ]])
+    for j in data:
+        rows.append(list(j))
+    print("Step4")
+    arr = []
+    arr.append(rows)
+    print(arr)
+    return render_template('scatter.html', ci=arr, rr=rows)
+
+
+ 9. Show us, in a link, the application running and we will try it out. Only for parts 6, 7, 8
+
+ 10. When complete, return (send) this quiz
+     If you finish early, send this immediately, otherwise send between
+     the end of class and no more than 1 minute after that.
+

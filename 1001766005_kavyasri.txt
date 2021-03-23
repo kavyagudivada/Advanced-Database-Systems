@@ -1,0 +1,137 @@
+
+Name:Kavya Sri Gudivada
+Last 4 digits ID:6005
+
+CSE 6331, Cloud Computing					
+
+Quiz Q2, 3.30, Summer 2020   (c) DL, UTA, 2020
+
+
+  C&P means cut and paste only those relevant lines from your program(s) into this quiz.
+
+ 1.  I understand that I am on my honor during this quiz, I will not collaborate, use 
+     non-allowed sources, and I will not discuss or share this quiz with anyone for the next 
+     12 hours.
+     You MAY: use Google to search, use previous source code, 
+     YOU MAY NOT use:
+     Email, Facebook, Hangouts, IM, chats, Skype or ANY other human connection.
+
+     ANY VIOLATIONS to scholastic honesty, which include working with others during this quiz, communicating with others during
+     this quiz, giving anyone or recieving from anyone any information during this quiz or for the next 6 hours after completion
+     of this quiz is a honors violation and will result in a -100 points being assessed for this quiz and being reported. 
+
+     This is a timed test. Late tests will have points deducted for being late.
+     Very late tests will not be graded.
+
+     When you are complete, with any part, please send the link, raise your hand, so we may visually inspect that part.
+
+     The second part of the test, you should electronically submit, you will need to copy and paste 
+     only those lines of code to implement that part of the test, usually a few (two to eight) lines of code. 
+     Place it immediately after the question.
+
+     Submit this Quiz (renamed) with code cut and pasted, ONLY text. DO NOT submit zips, binaries, libraries,
+     or anything other than text.
+
+     When any parts(questions) are complete complete, submit this test, you may make multiple submissions.
+
+     If you have computer, or other, problems, please raise your hand immediately.
+
+     If you understand and agree, please initial here:
+     __________KSG_______
+
+ 2. Get files from this same folder.
+   
+ 3. Name your program/submission with your name and last digits of your ID.
+
+ 4a. Using the cloud services provider, all functionality possible should be implemented on that provider.
+     (Of course, displaying web pages through a browser and the user interface is "local")
+
+ 4b. Upload all data files (*jpg and *csv, not this quiz) to cloud service. 
+  
+Show and submit code, when each part is complete, raise your hand and then show us:
+
+ To recieve credit you MUST show (demo) AND submit the code (text only) on Canvas.
+
+  5. Show a web page and interface (which resides on the cloud provider) with your name,
+     and below that, Student ID at the top of every web page dispayed 
+     (for this quiz). 
+     Please use a large font.
+    
+     The cloud service provider is either IBM Cloud (BlueMix) or Microsoft Azure.
+
+     On that same page, allow a user to give an id value (such as "ak020921jc6m"), then please show 
+     the details of that quake (if it exists), location (lat, long, place name), mag, time, depth.
+     If there are any other quakes with the same mag (same mag plus or minus 0.1 mag), please list
+     those as well.
+
+ <div id="title_bar" class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 id="main_title">{{ appname }}</h1>
+        <h2 id="student_id">1001766005</h2>
+        <h3 id="student_name">Gudivada, Kavya Sri</h3>
+      </div>
+    </div>
+
+ <form action="/eq" method="POST">
+                    Display the id : <input type="text" name="name" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+
+@app.route('/eq', methods=['GET', 'POST'])
+def eq():
+    eql = request.form['name']
+    # name=room
+    db2conn = ibm_db.connect("DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = ' Select "latitude","longitude","place" from l where "idl" =  \''+str(idl)+'\';'
+        sql1 = ' Select "depth","time","mag" from q where "idl" =  \'' + str(idl) + '\';'
+
+        stmt = ibm_db.exec_immediate(db2conn, sql)
+        stmt1 = ibm_db.exec_immediate(db2conn, sql1)
+        #     # ibm_db.execute(stmt)
+        rows = []
+        rows1 = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt)
+        result2 = ibm_db.fetch_assoc(stmt1)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt)
+        # close database connection
+        print(rows)
+        print(result2)
+        while result2:
+            rows1.append(result2.copy())
+            result2 = ibm_db.fetch_assoc(stmt1)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows1)
+    return render_template('name.html', data=rows , data1=rows1)
+  6. (Web page) Allow a user to give two location (pair) values (lat and long for two different locations) 
+     (those two locations create a boundary, a box) and a depth range (for example from 2 to 20),
+     then: display the 3 largest mag quakes within that (bounding) box, please display the id, location (as above),
+     the mag, and time.
+
+  7. (Web page), Allow a user to give a part of a location name (for example "Yellowstone" or "Alaska"), 
+     and a depth range (for example from 2 to 200), and a distance (for example 550 km), 
+     and show the largest magnitude quake (if one exists), within that distance.
+     Note, that there may be several locations in Alaska within that given depth range, 
+     so list the largest mag quake for each.
+     Please display the lat, long, mag, place, depth and date for each.
+    
+  8. (Similar to part 6, with some modification)
+     Allow a user to give two location (pair) values (lat and long for two different locations) 
+     (those two locations create a boundary, a box), and a value N, then: 
+     display the N largest mag quakes within that (bounding) box, (display lat, long, place, mag, time and id)
+     then allow a user to choose any of those quakes (displayed) and modify any of the values: 
+     lat, long, place, mag, time and id.
+
+  9. Show us, in a link, the application running and we will try it out. Only for parts 5, 6, 7, 8
+
+  10. When complete, return (send) this quiz
+      If you finish early, send this immediately, otherwise send between
+      the end of class and no more than 1 minute after that.
+

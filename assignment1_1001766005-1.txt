@@ -1,0 +1,311 @@
+
+Name:Kavya Sri Gudivada
+Last 4 digits ID:6005
+
+CSE 6331, Cloud Computing					
+
+
+Assignment 1
+
+1. Search for Chris (Name) and show his picture on a web page.
+ 
+Index.html:     
+                <form action="/getInfoByName" method="POST">
+                    Picture Name(Case Sensitive) : <input type="text" name="name" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+app.py:
+@app.route('/getInfoByName', methods=['GET', 'POST'])
+def getInfoByName():
+    name = str(request.form['name'])
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = "SELECT * FROM assignment1 WHERE \"Name\" ='"+str(name)+"\';"
+
+        stmt = ibm_db.exec_immediate(db2conn, sql)
+        #     # ibm_db.execute(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+
+    return render_template('name.html', data=rows)
+
+name.html:
+{% for pic in data %}
+<img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+{% endfor %}
+
+
+
+2. Search for (display) all pictures where the salary is less than 99000.
+index.html:
+
+<form action="/display" method="POST">
+	Display : <input type="text" name="id" required="1">
+        <button type="submit" class="btn btn-success ">Submit</button>
+</form>
+
+app.py:
+
+@app.route('/display', methods=['GET', 'POST'])
+def display():
+    name = request.form['id']
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = "SELECT * FROM assignment1 WHERE \"Salary\" LIKE \'%"+str(name)+"%\';"
+        stmt = ibm_db.exec_immediate(db2conn, sql)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+    return render_template('q7.html', data=rows)
+
+q7.html:
+
+{% for pic in data %}
+ <img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+<br>
+ <p> {{pic.Picture}}  </p>
+{% endfor %}
+
+
+
+3. Add a picture for Dave
+index.html:
+
+<form action="/update" method="POST">
+                    Name of the person : <input type="text" name="name" required="1">
+                    picture to be added : <input type="text" name="addpicture" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+</form>
+
+app.py:
+
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    up1 = request.form['name']
+    up2 = request.form['addpicture']
+    print("Entered update")
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = "UPDATE assignment1 SET \"Picture\" = \'" +str(up2)+ "\' WHERE \"Name\" = \'" +str(up1)+ "\';"
+
+        sql1 = "SELECT * FROM assignment1 WHERE \"Name\" ='"+str(up1)+"\';"
+
+        stmt1 = ibm_db.exec_immediate(db2conn, sql)
+        stmt2 = ibm_db.exec_immediate(db2conn, sql1)
+        print(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt1)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt1)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+    return render_template('up.html', data=rows)
+
+up.html:
+
+{% for pic in data %}
+
+
+{{pic.Person}}
+<img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+<br>
+<br>
+
+
+{% endfor %}
+
+
+
+4. Remove Dave
+index.html:
+
+<p> Remove</p>
+                <form action="/delete" method="POST">
+                     Remove person : <input type="text" name="removename" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+app.py:
+
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    up1 = request.form['removename']
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql1 = "DELETE FROM assignment1 WHERE \"Person\" = \'" + str(up1) + "\' ;"
+
+        sql2 = "SELECT * FROM assignment1;"
+        stmt1 = ibm_db.exec_immediate(db2conn, sql1)
+        stmt2 = ibm_db.exec_immediate(db2conn, sql2)
+        #     # ibm_db.execute(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt2)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt2)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+
+    return render_template('remove.html', data=rows)
+
+remove.html:
+
+{% for pic in data %}
+
+
+{{pic.Person}}
+<img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+<br>
+<br>
+
+
+{% endfor %}
+
+
+5. Change Jason’s keywords to “Not so nice anymore”
+index.html:
+
+<form action="/update" method="POST">
+                    Name of the person : <input type="text" name="name" required="1">
+                    keyword to be updated : <input type="text" name="addkeyword" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+</form>
+
+app.py:
+
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    up1 = request.form['name']
+    up2 = request.form['addkeyword']
+    print("Entered update")
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = "UPDATE assignment1 SET \"Keywords\" = \'" +str(up2)+ "\' WHERE \"Name\" = \'" +str(up1)+ "\';"
+
+        sql1 = "SELECT * FROM assignment1 WHERE \"Name\" ='"+str(up1)+"\';"
+
+        stmt1 = ibm_db.exec_immediate(db2conn, sql)
+        stmt2 = ibm_db.exec_immediate(db2conn, sql1)
+        print(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt1)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt1)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+    return render_template('up.html', data=rows)
+
+up.html:
+
+{% for pic in data %}
+
+
+{{pic.Person}}
+<img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+{{pic.Keywords}}
+<br>
+<br>
+
+
+{% endfor %}
+
+
+
+
+6. Change Someone’s salary
+
+index.html:
+
+<form action="/update" method="POST">
+                    Name of the person : <input type="text" name="name" required="1">
+                    Salary to be updated : <input type="text" name="addsalary" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+</form>
+
+app.py:
+
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    up1 = request.form['name']
+    up2 = request.form['addsalary']
+    print("Entered update")
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = "UPDATE assignment1 SET \"Salary\" = \'" +str(up2)+ "\' WHERE \"Name\" = \'" +str(up1)+ "\';"
+
+        sql1 = "SELECT * FROM assignment1 WHERE \"Name\" ='"+str(up1)+"\';"
+
+        stmt1 = ibm_db.exec_immediate(db2conn, sql)
+        stmt2 = ibm_db.exec_immediate(db2conn, sql1)
+        print(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt1)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt1)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+    return render_template('up.html', data=rows)
+
+up.html:
+
+{% for pic in data %}
+
+
+{{pic.Person}}
+<img style="height: 150px" src="static/images/{{pic.Picture}}" alt="No Image">
+{{pic.Salary}}
+<br>
+<br>
+
+
+{% endfor %}
+
+
+

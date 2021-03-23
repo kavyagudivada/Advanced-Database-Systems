@@ -1,0 +1,118 @@
+
+Name:Kavya Sri Gudivada
+Last 4 digits ID:6005
+
+CSE 6331, Cloud Computing					
+
+Assignment 3
+
+1) A number of random queries, inserts, deletes (up to 1000 queries/commands of random tuples in the dataset)
+Index.html:
+<p>
+ <form action="/Question1" method="get">
+	Depth Range1 <input type="text" name="nstLow" maxlength="200" width="60"> <br/>
+ 	Depth Range <input type="text" name="nstHigh" maxlength="200" width="60"><br/>
+	Latitude<input type="text" name="lat" maxlength="200" width="60"><br/>
+  <input type="submit" value="Submit"><br/><br/>
+</form>
+</p>
+
+app.py:
+@app.route("/", methods=["POST", "GET"])
+def index():
+    form = Question1Form()
+    if form.validate_on_submit():
+        nstLow = form.nstLow.data
+        nstHigh = form.nstHigh.data
+        start_time = time.time()
+        query1 = "INSERT INTO assignment3 (nst, latitude, longitude, place, mag, id) WHERE "+ str(nstLow) +" and "+  str(nstHigh)
+        query2 = "DELETE FROM assignment3 (nst, latitude, longitude, place, mag, id) WHERE "+ str(nstLow) +" and "+  str(nstHigh)
+        cursor.execute(query1, query2)
+        rows = cursor.fetchall()
+        print(rows)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        return render_template('index.html', form=form, elapsed_time=elapsed_time, table=rows)
+    return render_template('index.html', form=form, elapsed_time=None, table=None)
+
+2) restricted set of queries, similar to previous (1.) but where selection is restricted (ie only occurring in CA, or within N<100 km of a specified  lat,long location.
+index.html:
+<p>
+ <form action="/Question2" method="get">
+	Depth Range1<input type="text" name="dr1" maxlength="200" width="60"> <br/>
+ 	Depth Range2 to<input type="text" name="dr2" maxlength="200" width="60"><br/>
+	Number of queries to run:<input type="text" name="nom" maxlength="200" width="60"></br>
+   <input type="submit" value="run query n times"><br/><br/>
+</form>
+</p>
+
+app.py:
+@app.route("/", methods=["POST", "GET"])
+def index():
+    form = Question2Form()
+    if form.validate_on_submit():
+        nstLow = form.nstLow.data
+        nstHigh = form.nstHigh.data
+        start_time = time.time()
+        query1="SELECT count(*) from [assignment3] where depthError>'" + str(nstHigh) + "' and depthError <" + str(nstLow)
+        query2="SELECT count(*) from [assignment3] where depthError>'" + str(nstLow) + "' and depthError <" + str(nstHigh)
+        cursor.execute(query1, query2)
+        rows = cursor.fetchall()
+        print(rows)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        return render_template('index.html', form=form, elapsed_time=elapsed_time, table=rows)
+    return render_template('index.html', form=form, elapsed_time=None, table=None)
+
+
+3)Measure time expended to perform these queries.
+index.html:
+<p>
+ <form action="/Question3" method="get">
+	Display time<input type="text" name="dr1" maxlength="200" width="60"> <br/>
+   <input type="submit" value="run query n times"><br/><br/>
+</form>
+</p>
+
+app.py:
+@app.route("/", methods=["POST", "GET"])
+def index():
+    form = Question3Form()
+    if form.validate_on_submit():
+        nstLow = form.nstLow.data
+        nstHigh = form.nstHigh.data
+        start_time = time.time()
+        query1="select  "time" from assignment3
+        cursor.execute(query1)
+        rows = cursor.fetchall()
+        print(rows)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        return render_template('index.html', form=form, elapsed_time=elapsed_time, table=rows)
+    return render_template('index.html', form=form, elapsed_time=None, table=None)
+
+4)Show results.
+index.html:
+<p>
+ <form action="/Question4" method="get">
+	Display results<input type="text" name="dr1" maxlength="200" width="60"> <br/>
+   <input type="submit" value="run query n times"><br/><br/>
+</form>
+</p>
+
+app.py:
+@app.route("/", methods=["POST", "GET"])
+def index():
+    form = Question4Form()
+    if form.validate_on_submit():
+        nstLow = form.nstLow.data
+        nstHigh = form.nstHigh.data
+        start_time = time.time()
+        query1="select "latitude", "longitude", "place" , "mag", "time", "depth"from assignment3
+        cursor.execute(query1)
+        rows = cursor.fetchall()
+        print(rows)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        return render_template('index.html', form=form, elapsed_time=elapsed_time, table=rows)
+    return render_template('index.html', form=form, elapsed_time=None, table=None)

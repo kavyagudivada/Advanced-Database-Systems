@@ -1,0 +1,114 @@
+
+Name:Kavya Sri Gudivada
+Last 4 digits ID:6005
+
+CSE 6331, Cloud Computing					
+
+Assignment2
+
+1. How many quakes within about 200 KM? 
+
+index.html:
+<form action="/distance" method="POST">
+                     Display the distance within 200km : <input type="number" name="id" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+app.py:
+@app.route('/distance', methods=['GET', 'POST'])
+def distance():
+    dista = request.form['id']
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql = SELECT * FROM assignment2 WHERE (6371 * ACOS( SIN(0.5712399984457294) * SIN(RADIANS("latitude")) + COS(0.5712399984457294) *COS(RADIANS("latitude")) * COS(RADIANS("longitude") - (-1.6948991151752597)))) <= 200.00;
+
+        stmt = ibm_db.exec_immediate(db2conn, sql)
+        #     # ibm_db.execute(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+
+    return render_template('q7.html', data=rows)
+
+
+2. Largest quake in last week within 500 KM?
+
+index.html:
+<form action="/large" method="POST">
+                     Display the largest quake within 500km : <input type="number" name="id1" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+
+app.py:
+@app.route('/',methods=['GET','POST'])
+def large():
+up1 = request.form['id1']
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql1= ('SELECT max(\"mag\") FROM assignment2 WHERE (\"time\" BETWEEN  ? AND ? ) AND (6371 * ACOS(SIN(?) * SIN(RADIANS(\"latitude\")) + COS(?) *COS(RADIANS(\"latitude\")) *COS(RADIANS(\"longitude\") - (?)))) <= ? ",(start_date,end_date,lat1,lat1,lon1,distance,))')
+        la=math.radians(32.729641)
+	lo=math.radians(-97.110566)
+	distance = float(500)
+	print(la)
+	print(lo)
+	time_string='%'
+	start_date = '2020-07-12'
+	end_date='2020-07-21'
+	start_date +=time_string
+	end_date +=time_string
+	print(start_date)
+	print(end_date)
+	cur.execute()
+	result = cur.fetchall()
+	print(result[0][0])
+
+return render_template('largest.html', output=result[0][0])
+
+
+
+3. Where is closest quake with mag > 6? When?
+index.html:
+<form action="/magclose" method="POST">
+                     Display magnitude of closest earthquake : <input type="number" name="removename" required="1">
+                    <button type="submit" class="btn btn-success ">Submit</button>
+                </form>
+
+app.py:
+@app.route('/magclose', methods=['GET', 'POST'])
+def magclose():
+    up1 = request.form['removename']
+    db2conn = ibm_db.connect(
+        "DATABASE=BLUDB;HOSTNAME=dashdb-txn-sbox-yp-dal09-10.services.dal.bluemix.net;PORT=50000;PROTOCOL=TCPIP;UID=dbq96152;PWD=x@68wmv7qznf1h2n;",
+        "dbq96152", "x@68wmv7qznf1h2n")
+    if db2conn:
+        print('success')
+        sql1 = 'SELECT "id", "mag", "type", "time", "place", "locationSource",  (6371 * ACOS( SIN(0.5712399984457294) * SIN(RADIANS("latitude")) + COS(0.5712399984457294) *COS(RADIANS("latitude")) * COS(RADIANS("longitude") - (-1.6948991151752597)))) AS "Minimum Distance" FROM assignment2 WHERE (6371 * ACOS( SIN(0.5712399984457294) * SIN(RADIANS("latitude")) + COS(0.5712399984457294) *COS(RADIANS("latitude")) * COS(RADIANS("longitude") - (-1.6948991151752597)))) IN (SELECT MIN((6371 * ACOS( SIN(0.5712399984457294) * SIN(RADIANS("latitude")) + COS(0.5712399984457294) *COS(RADIANS("latitude")) * COS(RADIANS("longitude") - (-1.6948991151752597))))) AS "Minimum Distance" FROM earthquake WHERE "mag" > 6.00 );'
+
+        # stmt1 = ibm_db.exec_immediate(db2conn, sql1)
+        stmt2 = ibm_db.exec_immediate(db2conn, sql1)
+        #     # ibm_db.execute(stmt)
+        rows = []
+        # fetch the result
+        result = ibm_db.fetch_assoc(stmt2)
+        print (result)
+        while result:
+            rows.append(result.copy())
+            result = ibm_db.fetch_assoc(stmt2)
+        # close database connection
+        ibm_db.close(db2conn)
+        print(rows)
+
+    return render_template('remove.html', data=rows)
+
